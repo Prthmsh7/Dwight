@@ -3,7 +3,7 @@
 # Team Members :
 ~ Ayush Mati
 ~ Manas Singh
-~ Priya Jha
+~ Priya Jha ( github - priiyajha )
 ~ Prathmesh Shukla
 
 # Problem Statement :
