@@ -1,10 +1,114 @@
-# Dwight
+# Dwight - AI Content Moderation System
 
-# Team Members :
-~ Ayush Mati
-~ Manas Singh
-~ Priya Jha ( github - priiyajha )
-~ Prathmesh Shukla
+Dwight is a comprehensive solution for responsible and compliant use of Generative AI within organizations. It provides real-time monitoring, risk detection, and compliance enforcement for AI interactions.
+
+## Features
+
+- Real-time content moderation
+- Sentiment analysis
+- Entity recognition
+- Compliance monitoring
+- Risk scoring
+- User authentication
+- Audit logging
+- Prometheus metrics
+- Grafana dashboards
+
+## Prerequisites
+
+- Docker and Docker Compose
+- Python 3.9+
+- PostgreSQL
+- Redis
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/your-org/dwight.git
+cd dwight
+```
+
+2. Create a `.env` file based on `.env.example`:
+```bash
+cp .env.example .env
+```
+
+3. Update the environment variables in `.env` with your configuration.
+
+4. Build and start the services:
+```bash
+docker-compose up --build
+```
+
+## API Documentation
+
+Once the application is running, you can access the API documentation at:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+## Monitoring
+
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000 (default credentials: admin/admin)
+
+## Development
+
+1. Create a virtual environment:
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Run the application:
+```bash
+uvicorn dwight.main:app --reload
+```
+
+## Testing
+
+Run the test suite:
+```bash
+pytest
+```
+
+## Project Structure
+
+```
+dwight/
+├── api/                # API endpoints
+├── core/               # Core functionality
+├── models/             # Database models
+├── services/           # Business logic
+├── utils/              # Utility functions
+├── config/             # Configuration
+├── tests/              # Test suite
+└── main.py             # Application entry point
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Team
+
+- Ayush Mati
+- Manas Singh
+- Priya Jha
+- Prathmesh Shukla
 
 # Problem Statement :
 Create a solution for responsible and compliant use of Generative AI, focusing on OpenAI's ChatGPT within organizations. Design an automated system to monitor and prevent risks like inappropriate content, regulatory violations, and privacy breaches. Ensure real-time monitoring, risk-based alerts, and compliance with organizational policies and regulations. Aim for innovation, scalability, and ethical deployment to build trust among users and stakeholders.
