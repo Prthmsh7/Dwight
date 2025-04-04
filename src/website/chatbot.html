@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini AI Chatbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .chat-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+        .chat-header {
+            background-color: #1a73e8;
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .chat-header span {
+            padding: 3px 8px;
+            background-color: #34a853;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            line-height: 1.4;
+        }
+        .user-message {
+            background-color: #e8f0fe;
+            color: #202124;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        .bot-message {
+            background-color: #f1f3f4;
+            color: #202124;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        .error-message {
+            background-color: #fce8e6;
+            color: #d93025;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            background-color: #f1f3f4;
+            border-top: 1px solid #dadce0;
+        }
+        .chat-input textarea {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #dadce0;
+            border-radius: 20px;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+        .chat-input button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 0 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .chat-input button:hover {
+            background-color: #1565c0;
+        }
+        .chat-input button:disabled {
+            background-color: #dadce0;
+            color: #80868b;
+            cursor: not-allowed;
+        }
+        .api-key-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .api-key-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .api-key-content h3 {
+            margin-top: 0;
+            color: #202124;
+        }
+        .api-key-content input, .api-key-content select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .api-key-content button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .api-key-content button:hover {
+            background-color: #1565c0;
+        }
+        .settings-button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        .settings-button svg {
+            margin-right: 5px;
+        }
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            margin: 0 1px;
+            background-color: #dadce0;
+            border-radius: 50%;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        .typing-indicator span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        .helper-text {
+            font-size: 12px;
+            color: #5f6368;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>AI Chatbot</h2>
+            <div>
+                <button class="settings-button" onclick="openApiKeyModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    Settings
+                </button>
+                <span>Online</span>
+            </div>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                Hello! I'm your AI assistant. How can I help you today?
+            </div>
+            <div class="typing-indicator" id="typingIndicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        <div class="chat-input">
+            <textarea 
+                id="userInput" 
+                placeholder="Type your message here..." 
+                rows="1" 
+                onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }">
+            </textarea>
+            <button onclick="sendMessage()" id="sendButton">Send</button>
+        </div>
+    </div>
+
+    <div class="api-key-modal" id="apiKeyModal">
+        <div class="api-key-content">
+            <h3>Enter Your Gemini API Key</h3>
+            <p>Your API key is stored locally on your browser and is not sent to our servers.</p>
+            <input type="password" id="apiKeyInput" placeholder="AI...">
+            <div class="helper-text">Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></div>
+            
+            <h4>Model Settings</h4>
+            <select id="modelSelect" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #dadce0; border-radius: 4px;">
+                <option value="gemini-pro">Gemini Pro</option>
+                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            </select>
+            
+            <button onclick="saveApiKey()">Save and Continue</button>
+        </div>
+    </div>
+
+    <script>
+        // Check if API key is stored
+        let apiKey = localStorage.getItem('gemini_api_key');
+        let selectedModel = localStorage.getItem('gemini_model') || 'gemini-pro';
+        const apiKeyModal = document.getElementById('apiKeyModal');
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const modelSelect = document.getElementById('modelSelect');
+        
+        // Initialize model select with stored value
+        if (selectedModel) {
+            modelSelect.value = selectedModel;
+        }
+        
+        // Show modal if no API key is found
+        if (!apiKey) {
+            apiKeyModal.style.display = 'flex';
+        } else {
+            apiKeyModal.style.display = 'none';
+        }
+
+        function openApiKeyModal() {
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            if (apiKey) apiKeyInput.value = apiKey;
+            apiKeyModal.style.display = 'flex';
+        }
+
+        function saveApiKey() {
+            const input = document.getElementById('apiKeyInput');
+            apiKey = input.value.trim();
+            selectedModel = modelSelect.value;
+            
+            if (apiKey) {
+                localStorage.setItem('gemini_api_key', apiKey);
+                localStorage.setItem('gemini_model', selectedModel);
+                apiKeyModal.style.display = 'none';
+            } else {
+                alert('Please enter a valid API key');
+            }
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Disable input and button while processing
+            userInput.value = '';
+            userInput.disabled = true;
+            sendButton.disabled = true;
+
+            // Add user message to chat
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user-message';
+            userMessageDiv.textContent = message;
+            chatMessages.appendChild(userMessageDiv);
+            
+            // Show typing indicator
+            typingIndicator.style.display = 'flex';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                // Determine API endpoint based on model
+                let apiEndpoint;
+                if (selectedModel === 'gemini-pro') {
+                    apiEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+                } else if (selectedModel === 'gemini-1.5-pro') {
+                    apiEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
+                } else if (selectedModel === 'gemini-1.5-flash') {
+                    apiEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+                }
+
+                // Call Gemini API
+                const response = await fetch(`${apiEndpoint}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [
+                            {
+                                role: 'user',
+                                parts: [
+                                    {
+                                        text: message
+                                    }
+                                ]
+                            }
+                        ],
+                        generationConfig: {
+                            temperature: 0.9,
+                            maxOutputTokens: 800,
+                            topP: 0.95
+                        }
+                    })
+                });
+
+                // Hide typing indicator
+                typingIndicator.style.display = 'none';
+
+                if (!response.ok) {
+                    let errorMessage = 'Sorry, there was an error processing your request.';
+                    
+                    if (response.status === 429) {
+                        errorMessage = 'Rate limit exceeded (Error 429). Your API key has reached its quota or rate limit.';
+                    } else if (response.status === 400) {
+                        errorMessage = 'Invalid request format (Error 400). Please try again with a different query.';
+                    } else if (response.status === 401) {
+                        errorMessage = 'Invalid API key (Error 401). Please check your API key and try again. Click the "Settings" button to update your key.';
+                    } else {
+                        const errorData = await response.json().catch(() => ({}));
+                        if (errorData && errorData.error) {
+                            errorMessage = `Error: ${errorData.error.message || 'Unknown error'}`;
+                        }
+                    }
+                    
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'message error-message';
+                    errorDiv.innerHTML = errorMessage;
+                    chatMessages.appendChild(errorDiv);
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+
+                const data = await response.json();
+                let botReply = '';
+                
+                if (data.candidates && data.candidates[0] && data.candidates[0].content && 
+                    data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+                    botReply = data.candidates[0].content.parts[0].text;
+                } else {
+                    botReply = "I'm sorry, I couldn't generate a response. Please try again.";
+                }
+
+                // Add bot message to chat
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.className = 'message bot-message';
+                botMessageDiv.textContent = botReply;
+                chatMessages.appendChild(botMessageDiv);
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // If we haven't already displayed an error message
+                if (typingIndicator.style.display !== 'none') {
+                    // Hide typing indicator
+                    typingIndicator.style.display = 'none';
+
+                    // Show generic error message
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'message error-message';
+                    errorDiv.innerHTML = 'Sorry, there was an error connecting to the Gemini API. Please try again later or check your console for details.';
+                    chatMessages.appendChild(errorDiv);
+                }
+            } finally {
+                // Re-enable input and button
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        // Auto-resize the textarea as the user types
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    </script>
+</body>
+</html>
